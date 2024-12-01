@@ -25,7 +25,9 @@ def index():
     # Search query parameters
     search_query = request.args.get('search', '')
     year_filter = request.args.get('year', None)
-    sort_order = request.args.get('sort', 'asc')
+    month_filter = request.args.get('month', None)  # Get month filter
+    day_filter = request.args.get('day', None)  # Get day filter
+    sort_order = request.args.get('sort', 'desc')
 
     # Build SQL query with filters and pagination
     query = "SELECT * FROM Public.games WHERE game_name ILIKE %s"
@@ -35,8 +37,16 @@ def index():
         query += " AND release_year = %s"
         params.append(year_filter)
 
-    # Add sorting by release year
-    query += f" ORDER BY release_year {sort_order} LIMIT %s OFFSET %s"
+    if month_filter:
+        query += " AND release_month = %s"
+        params.append(month_filter)
+
+    if day_filter:
+        query += " AND release_day = %s"
+        params.append(day_filter)
+
+    # Add sorting by release year, month, and day
+    query += f" ORDER BY release_year {sort_order}, release_month {sort_order}, release_day {sort_order} LIMIT %s OFFSET %s"
     params.extend([items_per_page, offset])
 
     # Execute the query
@@ -56,7 +66,8 @@ def index():
     total_pages = ceil(total_records / items_per_page)
 
     return render_template('index.html', games=games, page=page, total_pages=total_pages,
-                           search_query=search_query, year_filter=year_filter, sort_order=sort_order)
+                           search_query=search_query, year_filter=year_filter, sort_order=sort_order,
+                           month_filter=month_filter, day_filter=day_filter)
 
 
 @app.route('/add', methods=['GET', 'POST'])
