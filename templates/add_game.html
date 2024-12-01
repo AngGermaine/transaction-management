@@ -151,6 +151,22 @@
             font-size: 16px;
             color: #333;
         }
+
+        .back-button {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .back-button a {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .back-button a:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
@@ -221,7 +237,9 @@
             // Initialize days when the page loads
             updateDays();
         </script>
-        
+        <div class="back-button">
+            <a href="{{ url_for('index') }}">Back to Games List</a>
+        </div>
     </div>
 </body>
 </html>

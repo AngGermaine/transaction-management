@@ -66,6 +66,22 @@
         button:hover {
             background-color: #45a049;
         }
+
+        .back-button {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .back-button a {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .back-button a:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
@@ -86,6 +102,10 @@
 
             <button type="submit">Update Game</button>
         </form>
+
+        <div class="back-button">
+            <a href="{{ url_for('index') }}">Back to Games List</a>
+        </div>
     </div>
 
     <script>
