@@ -27,11 +27,11 @@ def index():
     year_filter = request.args.get('year', None)
     month_filter = request.args.get('month', None)  # Get month filter
     day_filter = request.args.get('day', None)  # Get day filter
-    sort_order = request.args.get('sort', 'desc')
+    sort_order = request.args.get('sort', 'id_desc')  # Default sort by 'id_desc'
 
     # Build SQL query with filters and pagination
     query = "SELECT * FROM Public.games WHERE game_name ILIKE %s"
-    params = [f"%{search_query}%"]
+    params = [f"%{search_query}%"]  # Using ILIKE for case-insensitive search
 
     if year_filter:
         query += " AND release_year = %s"
@@ -47,7 +47,7 @@ def index():
 
     # Add sorting logic based on the sort order
     if sort_order == 'id_desc':
-        query += " ORDER BY id DESC"  # Sort by ID in descending order
+        query += " ORDER BY id DESC"  # Sort by ID in descending order (recently added first)
     else:
         query += f" ORDER BY release_year {sort_order}, release_month {sort_order}, release_day {sort_order}"
 
