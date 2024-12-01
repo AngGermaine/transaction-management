@@ -45,8 +45,13 @@ def index():
         query += " AND release_day = %s"
         params.append(day_filter)
 
-    # Add sorting by release year, month, and day
-    query += f" ORDER BY release_year {sort_order}, release_month {sort_order}, release_day {sort_order} LIMIT %s OFFSET %s"
+    # Add sorting logic based on the sort order
+    if sort_order == 'id_desc':
+        query += " ORDER BY id DESC"  # Sort by ID in descending order
+    else:
+        query += f" ORDER BY release_year {sort_order}, release_month {sort_order}, release_day {sort_order}"
+
+    query += " LIMIT %s OFFSET %s"
     params.extend([items_per_page, offset])
 
     # Execute the query
@@ -68,6 +73,7 @@ def index():
     return render_template('index.html', games=games, page=page, total_pages=total_pages,
                            search_query=search_query, year_filter=year_filter, sort_order=sort_order,
                            month_filter=month_filter, day_filter=day_filter)
+
 
 
 @app.route('/add', methods=['GET', 'POST'])

@@ -208,6 +208,7 @@
             <select name="sort" id="sort">
                 <option value="asc" {% if sort_order == 'asc' %}selected{% endif %}>Ascending</option>
                 <option value="desc" {% if sort_order == 'desc' %}selected{% endif %}>Descending</option>
+                <option value="id_desc" {% if sort_order == 'id_desc' %}selected{% endif %}>Recently Added</option>
             </select>
 
             <button type="submit">Apply Filters</button>
