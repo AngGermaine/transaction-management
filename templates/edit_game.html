@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 30px;
+            color: #333;
+        }
+
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            padding: 20px;
+            display: center;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        form {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-direction: column;
+            flex-wrap: nowrap;
+            align-items: center;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input[type="text"], input[type="number"], select {
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 250px;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #4caf4f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 150px;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Edit Game</h1>
+        <form method="POST">
+            <label for="game_name">Game Name:</label>
+            <input type="text" name="game_name" value="{{ game[1] }}" required>
+
+            <label for="release_year">Release Year:</label>
+            <input type="number" name="release_year" value="{{ game[2] }}" min="1991" required>
+
+            <label for="release_month">Release Month:</label>
+            <input type="number" name="release_month" id="release_month" value="{{ game[3] }}" min="1" max="12" required oninput="updateDays()">
+
+            <label for="release_day">Release Day:</label>
+            <input type="number" name="release_day" id="release_day" value="{{ game[4] }}" required>
+
+            <button type="submit">Update Game</button>
+        </form>
+    </div>
+
+    <script>
+        // Function to update the days based on the selected month
+        function updateDays() {
+            const month = parseInt(document.getElementById('release_month').value);
+            const daysInMonth = getDaysInMonth(month);
+            const dayInput = document.getElementById('release_day');
+            const currentDay = parseInt(dayInput.value);
+
+            // Limit the day input to the maximum days of the selected month
+            if (currentDay > daysInMonth) {
+                dayInput.value = daysInMonth;  // Set to the last valid day if current is invalid
+            }
+
+            // Dynamically update the max day
+            dayInput.max = daysInMonth;
+        }
+
+        // Function to return the number of days in a month (1-12)
+        function getDaysInMonth(month) {
+            // Days in each month
+            const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+            
+            // Adjust for leap year for February
+            if (month === 2) {
+                const year = parseInt(document.querySelector('[name="release_year"]').value);
+                if ((year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0)) {
+                    return 29;  // Leap year adjustment
+                }
+            }
+            
+            return daysInMonth[month - 1];
+        }
+
+        // Initialize the form by setting the valid days based on the default month
+        document.addEventListener('DOMContentLoaded', updateDays);
+    </script>
+</body>
+</html>
