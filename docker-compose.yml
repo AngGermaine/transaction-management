@@ -1,5 +1,3 @@
-version: '3.4'
-
 services:
   transactionmanagement:
     image: transactionmanagement
@@ -7,4 +5,16 @@ services:
       context: .
       dockerfile: ./Dockerfile
     ports:
-      - 8080:8080
+      - 5001:8080
+    depends_on:
+      - db
+  db:
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=games
+
+  volumes:
+  postgres_data:
