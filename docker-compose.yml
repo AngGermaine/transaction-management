@@ -23,6 +23,12 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=admin
       - POSTGRES_DB=games
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    command: >
+      postgres -c wal_level=replica
+               -c max_wal_senders=3
+               -c archive_mode=on
+               -c hot_standby=on
     
 
   db2:
@@ -35,6 +41,10 @@ services:
       - POSTGRES_DB=games
     ports:
       - "5433:5432"
+    command: >
+      postgres -c hot_standby=on
+    depends_on:
+    - db
 
   db3:
     image: postgres:17
@@ -46,6 +56,10 @@ services:
       - POSTGRES_DB=games
     ports:
       - "5434:5432"
+    command: >
+      postgres -c hot_standby=on
+    depends_on:
+    - db
 
 volumes:
   postgres_data:
