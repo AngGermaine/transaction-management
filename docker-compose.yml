@@ -17,35 +17,50 @@ services:
 
   db:
     image: postgres:17
+    container_name: transaction-management-db-1
     volumes:
       - postgres_data:/var/lib/postgresql/data/
+      - ./postgres-1/pgdata:/data
+      - ./postgres-1/config:/config
+      - ./postgres-1/archive:/var/lib/postgresql/archive
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=admin
       - POSTGRES_DB=games
+    command: postgres -c 'config_file=/config/postgresql.conf'
     
 
   db2:
     image: postgres:17
     volumes:
       - postgres_data2:/var/lib/postgresql/data/
+      - ./postgres-2/pgdata:/data
+      - ./postgres-2/config:/config
+      - ./postgres-2/archive:/var/lib/postgresql/archive
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=admin
       - POSTGRES_DB=games
     ports:
       - "5433:5432"
+    command: postgres -c 'config_file=/config/postgresql.conf'
+
 
   db3:
     image: postgres:17
     volumes:
       - postgres_data3:/var/lib/postgresql/data/
+      - ./postgres-3/pgdata:/data
+      - ./postgres-3/config:/config
+      - ./postgres-3/archive:/var/lib/postgresql/archive
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=admin
       - POSTGRES_DB=games
     ports:
       - "5434:5432"
+    command: postgres -c 'config_file=/config/postgresql.conf'
+
 
 volumes:
   postgres_data:
