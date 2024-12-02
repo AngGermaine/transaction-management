@@ -1,10 +1,25 @@
 version: '3.4'
 
 services:
-  transactionmanagement:
-    image: transactionmanagement
-    build:
-      context: .
-      dockerfile: ./Dockerfile
+  web:
+    build: ./services/web
+    command: python manage.py run -h 0.0.0.0
+    volumes:
+      - ./services/web/:/usr/src/app/
     ports:
-      - 8080:8080
+      - 5001:5000
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+  db:
+    image: postgres:17
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=games
+
+volumes:
+  postgres_data:

@@ -1,5 +1,0 @@
-#requirements.txt
-
-flask
-gunicorn
-psycopg2

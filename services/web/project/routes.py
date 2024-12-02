@@ -1,37 +1,34 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Blueprint, render_template, request, redirect, url_for
 import psycopg2
 from math import ceil
+import os
 
-app = Flask(__name__)
+# Create a Blueprint
+app_routes = Blueprint("app_routes", __name__)
 
-# Connect to the PostgreSQL database
+# Database connection
 def get_db_connection():
-    conn = psycopg2.connect(
-        dbname='games', 
-        user='postgres', 
-        password='admin', 
-        host='localhost', 
-        port='5432'
-    )
+    conn = psycopg2.connect(os.environ["DATABASE_URL"])
     return conn
 
-@app.route('/', methods=['GET'])
+@app_routes.route("/", methods=["GET"])
 def index():
     # Pagination setup
-    page = request.args.get('page', 1, type=int)  # Get page number, default to 1
+    page = request.args.get("page", 1, type=int)
     items_per_page = 100
     offset = (page - 1) * items_per_page
 
     # Search query parameters
-    search_query = request.args.get('search', '')
-    year_filter = request.args.get('year', None)
-    month_filter = request.args.get('month', None)  # Get month filter
-    day_filter = request.args.get('day', None)  # Get day filter
-    sort_order = request.args.get('sort', 'id_desc')  # Default sort by 'id_desc'
+    search_query = request.args.get("search", "")
+    year_filter = request.args.get("year", None)
+    month_filter = request.args.get("month", None)
+    day_filter = request.args.get("day", None)
+    sort_order = request.args.get("sort", "id_desc")
 
     query = "SELECT * FROM Public.games WHERE game_name ILIKE %s"
-    params = [f"%{search_query}%"]  # Using ILIKE for case-insensitive search
+    params = [f"%{search_query}%"]
 
+    # Add conditions based on filters, only if they're not None
     if year_filter and year_filter != "None" and year_filter.strip():
         query += " AND release_year = %s"
         params.append(year_filter)
@@ -44,14 +41,15 @@ def index():
         query += " AND release_day = %s"
         params.append(day_filter)
 
-    if sort_order == 'id_desc':
-        query += " ORDER BY id DESC"  # Sort by ID in descending order (recently added first)
+    if sort_order == "id_desc":
+        query += " ORDER BY id DESC"
     else:
         query += f" ORDER BY release_year {sort_order}, release_month {sort_order}, release_day {sort_order}"
 
     query += " LIMIT %s OFFSET %s"
     params.extend([items_per_page, offset])
 
+    # Database connection and query execution
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute(query, tuple(params))
@@ -67,23 +65,19 @@ def index():
     # Calculate the number of pages
     total_pages = ceil(total_records / items_per_page)
 
-    return render_template('index.html', games=games, page=page, total_pages=total_pages,
+    return render_template("index.html", games=games, page=page, total_pages=total_pages,
                            search_query=search_query, year_filter=year_filter, sort_order=sort_order,
                            month_filter=month_filter, day_filter=day_filter)
 
 
-
-
-@app.route('/add', methods=['GET', 'POST'])
+@app_routes.route("/add", methods=["GET", "POST"])
 def add_game():
-    if request.method == 'POST':
-        # Get the game details from the form
-        game_name = request.form['game_name']
-        release_year = request.form['release_year']
-        release_month = int(request.form['release_month'])  # Convert month to integer
-        release_day = int(request.form['release_day'])  # Convert day to integer
+    if request.method == "POST":
+        game_name = request.form["game_name"]
+        release_year = request.form["release_year"]
+        release_month = int(request.form["release_month"])
+        release_day = int(request.form["release_day"])
 
-        # Insert into the database
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute("INSERT INTO Public.games (game_name, release_year, release_month, release_day) VALUES (%s, %s, %s, %s)",
@@ -92,56 +86,45 @@ def add_game():
         cur.close()
         conn.close()
 
-        return redirect(url_for('index'))  # Redirect to the main page after adding
+        return redirect(url_for("app_routes.index"))
 
-    return render_template('add_game.html')
+    return render_template("add_game.html")
 
-
-
-@app.route('/edit/<int:game_id>', methods=['GET', 'POST'])
+@app_routes.route("/edit/<int:game_id>", methods=["GET", "POST"])
 def edit_game(game_id):
     conn = get_db_connection()
     cur = conn.cursor()
 
-    # Fetch the game to edit
     cur.execute("SELECT * FROM Public.games WHERE id = %s", (game_id,))
     game = cur.fetchone()
 
-    if request.method == 'POST':
-        # Get the updated game details from the form
-        game_name = request.form['game_name']
-        release_year = request.form['release_year']
-        release_month = request.form['release_month']
-        release_day = request.form['release_day']
+    if request.method == "POST":
+        game_name = request.form["game_name"]
+        release_year = request.form["release_year"]
+        release_month = request.form["release_month"]
+        release_day = request.form["release_day"]
 
-        # Update the game in the database
         cur.execute("UPDATE Public.games SET game_name = %s, release_year = %s, release_month = %s, release_day = %s WHERE id = %s",
                     (game_name, release_year, release_month, release_day, game_id))
         conn.commit()
         cur.close()
         conn.close()
 
-        return redirect(url_for('index'))  # Redirect to the main page after updating
+        return redirect(url_for("app_routes.index"))
 
     cur.close()
     conn.close()
 
-    return render_template('edit_game.html', game=game)
+    return render_template("edit_game.html", game=game)
 
-
-@app.route('/delete/<int:game_id>', methods=['GET'])
+@app_routes.route("/delete/<int:game_id>", methods=["GET"])
 def delete_game(game_id):
     conn = get_db_connection()
     cur = conn.cursor()
 
-    # Delete the game from the database
     cur.execute("DELETE FROM Public.games WHERE id = %s", (game_id,))
     conn.commit()
     cur.close()
     conn.close()
 
-    return redirect(url_for('index'))  # Redirect to the main page after deleting
-
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    return redirect(url_for("app_routes.index"))
