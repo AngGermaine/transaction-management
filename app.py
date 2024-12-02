@@ -29,23 +29,21 @@ def index():
     day_filter = request.args.get('day', None)  # Get day filter
     sort_order = request.args.get('sort', 'id_desc')  # Default sort by 'id_desc'
 
-    # Build SQL query with filters and pagination
     query = "SELECT * FROM Public.games WHERE game_name ILIKE %s"
     params = [f"%{search_query}%"]  # Using ILIKE for case-insensitive search
 
-    if year_filter:
+    if year_filter and year_filter != "None" and year_filter.strip():
         query += " AND release_year = %s"
         params.append(year_filter)
 
-    if month_filter:
+    if month_filter and month_filter != "None" and month_filter.strip():
         query += " AND release_month = %s"
         params.append(month_filter)
 
-    if day_filter:
+    if day_filter and day_filter != "None" and day_filter.strip():
         query += " AND release_day = %s"
         params.append(day_filter)
 
-    # Add sorting logic based on the sort order
     if sort_order == 'id_desc':
         query += " ORDER BY id DESC"  # Sort by ID in descending order (recently added first)
     else:
