@@ -265,15 +265,15 @@
         </table>
 
         <!-- Pagination -->
-        <div class="pagination">
-            {% if page > 1 %}
-                <a href="?page={{ page - 1 }}&search={{ search_query }}&year={{ year_filter }}&sort={{ sort_order }}">Previous</a>
-            {% endif %}
+            <div class="pagination">
+                {% if page > 1 %}
+                    <a href="?page={{ page - 1 }}&search={{ search_query }}&year={{ year_filter }}&month={{ month_filter }}&day={{ day_filter }}&sort={{ sort_order }}">Previous</a>
+                {% endif %}
             <span>Page {{ page }} of {{ total_pages }}</span>
-            {% if page < total_pages %}
-                <a href="?page={{ page + 1 }}&search={{ search_query }}&year={{ year_filter }}&sort={{ sort_order }}">Next</a>
-            {% endif %}
-        </div>
+                {% if page < total_pages %}
+                    <a href="?page={{ page + 1 }}&search={{ search_query }}&year={{ year_filter }}&month={{ month_filter }}&day={{ day_filter }}&sort={{ sort_order }}">Next</a>
+                {% endif %}
+            </div>
     </div>
 </body>
 </html>

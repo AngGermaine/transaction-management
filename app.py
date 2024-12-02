@@ -52,7 +52,6 @@ def index():
     query += " LIMIT %s OFFSET %s"
     params.extend([items_per_page, offset])
 
-    # Execute the query
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute(query, tuple(params))
@@ -71,6 +70,7 @@ def index():
     return render_template('index.html', games=games, page=page, total_pages=total_pages,
                            search_query=search_query, year_filter=year_filter, sort_order=sort_order,
                            month_filter=month_filter, day_filter=day_filter)
+
 
 
 
