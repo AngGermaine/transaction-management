@@ -1,18 +1,35 @@
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Flask, Blueprint, render_template, request, redirect, url_for, session
 import psycopg2
 from math import ceil
 import os
+
 
 # Create a Blueprint
 app_routes = Blueprint("app_routes", __name__)
 
 # Database connection
-def get_db_connection():
-    conn = psycopg2.connect(os.environ["DATABASE_URL"])
+def get_db_connection(db_type="master"):
+
+    if db_type is None:
+        db_type = session.get('db_type', 'master')  # Default to 'master' if no db_type is in the session
+
+    # Default to the master database
+    if db_type == "db2":
+        db_url = os.getenv("DATABASE_URL_SLAVE1")
+    elif db_type == "db3":
+        db_url = os.getenv("DATABASE_URL_SLAVE2")
+    else:
+        db_url = os.getenv("DATABASE_URL_MASTER")
+    
+    # Parse the database URL (can be adjusted depending on your connection library)
+    conn = psycopg2.connect(db_url)
     return conn
 
 @app_routes.route("/", methods=["GET"])
 def index():
+    # Get the database type from the query parameter (or default to "master")
+    db_type = request.args.get("db", "master")
+    
     # Pagination setup
     page = request.args.get("page", 1, type=int)
     items_per_page = 100
@@ -28,7 +45,7 @@ def index():
     query = "SELECT * FROM Public.games WHERE game_name ILIKE %s"
     params = [f"%{search_query}%"]
 
-    # Add conditions based on filters, only if they're not None
+    # Add conditions based on filters
     if year_filter and year_filter != "None" and year_filter.strip():
         query += " AND release_year = %s"
         params.append(year_filter)
@@ -50,7 +67,7 @@ def index():
     params.extend([items_per_page, offset])
 
     # Database connection and query execution
-    conn = get_db_connection()
+    conn = get_db_connection(db_type)
     cur = conn.cursor()
     cur.execute(query, tuple(params))
     games = cur.fetchall()
@@ -68,6 +85,14 @@ def index():
     return render_template("index.html", games=games, page=page, total_pages=total_pages,
                            search_query=search_query, year_filter=year_filter, sort_order=sort_order,
                            month_filter=month_filter, day_filter=day_filter)
+
+# Routes for handling database selection
+@app_routes.route('/set_db', methods=['POST'])
+def set_db():
+    db_type = request.form.get('db_type')  # Get the selected db_type from the form
+    session['db_type'] = db_type  # Store the selected db_type in the session for future requests
+    return redirect(url_for('app_routes.index', db=db_type))  # Redirect back to the main page
+
 
 
 @app_routes.route("/add", methods=["GET", "POST"])

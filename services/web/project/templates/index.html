@@ -191,7 +191,16 @@
 <body>
     <div class="container">
         <h1>Games List</h1>
-
+        <form method="POST" action="{{ url_for('app_routes.set_db') }}">
+            <label for="db_type">Select Database:</label>
+            <select name="db_type" id="db_type">
+                <option value="master" {% if request.args.get('db') == 'master' %}selected{% endif %}>Master</option>
+                <option value="db2" {% if request.args.get('db') == 'db2' %}selected{% endif %}>slave 1</option>
+                <option value="db3" {% if request.args.get('db') == 'db3' %}selected{% endif %}>slave 2</option>
+            </select>
+            <button type="submit">Switch Database</button>
+        </form>
+        
         <!-- Add Game Button -->
         <div class="add-button">
             <a href="{{ url_for('app_routes.add_game') }}">Add New Game</a>

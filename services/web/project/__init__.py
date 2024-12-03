@@ -2,9 +2,13 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from project.routes import app_routes
 
+import os
 
 # Initialize the Flask app
 app = Flask(__name__)
+
+app.secret_key = os.urandom(24)
+
 
 # Load the configuration
 app.config.from_object("project.config.Config")
